@@ -101,12 +101,12 @@ class MembershipGroupTag(BaseModel):
 
 class CreateMembershipRequest(BaseModel):
     merchant: str
-    country: str
+    country: Optional[str] = None
     membership_number: str
     expiry_date: Optional[date] = None
     group_ids: list[uuid.UUID] = []
 
-    @field_validator("merchant", "country", "membership_number")
+    @field_validator("merchant", "membership_number")
     @classmethod
     def not_empty(cls, v: str) -> str:
         v = v.strip()
@@ -122,7 +122,7 @@ class UpdateMembershipRequest(BaseModel):
     expiry_date: Optional[date] = None
     group_ids: Optional[list[uuid.UUID]] = None
 
-    @field_validator("merchant", "country", "membership_number", mode="before")
+    @field_validator("merchant", "membership_number", mode="before")
     @classmethod
     def not_empty(cls, v: object) -> object:
         if isinstance(v, str):
@@ -135,7 +135,7 @@ class UpdateMembershipRequest(BaseModel):
 class MembershipResponse(BaseModel):
     id: uuid.UUID
     merchant: str
-    country: str
+    country: Optional[str] = None
     membership_number: str
     screenshot_url: Optional[str] = None
     expiry_date: Optional[date] = None

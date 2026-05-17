@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     session_secret_key: str
 
     frontend_url: str = "http://localhost:5173"
-    media_base_url: str = "http://localhost:8000/media"
     upload_dir: str = "uploads"
     max_upload_bytes: int = 5 * 1024 * 1024
 

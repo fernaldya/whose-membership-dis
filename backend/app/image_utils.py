@@ -43,4 +43,4 @@ def delete_image(relative_path: str) -> None:
 def image_url(relative_path: str | None) -> str | None:
     if not relative_path:
         return None
-    return f"{settings.media_base_url}/{relative_path}"
+    return f"/media/{relative_path}"

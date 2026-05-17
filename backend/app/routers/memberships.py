@@ -6,6 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import exists as sa_exists, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,7 +35,7 @@ def _to_response(m: Membership, current_user_id: uuid.UUID) -> MembershipRespons
         membership_number=m.membership_number,
         screenshot_url=image_url(m.screenshot_path),
         expiry_date=m.expiry_date,
-        is_expired=m.expiry_date is not None and m.expiry_date < date.today(),
+        is_expired=m.is_expired,
         created_at=m.created_at,
         updated_at=m.updated_at,
         groups=[MembershipGroupTag(id=g.id, name=g.name) for g in m.groups],
@@ -209,7 +210,7 @@ async def list_memberships(
 @router.post("", response_model=MembershipResponse, status_code=status.HTTP_201_CREATED)
 async def create_membership(
     merchant: str = Form(...),
-    country: str = Form(...),
+    country: Optional[str] = Form(None),
     membership_number: str = Form(...),
     expiry_date: Optional[date] = Form(None),
     group_ids: list[uuid.UUID] = Form(default=[]),
@@ -222,15 +223,24 @@ async def create_membership(
     membership = Membership(
         user_id=user.id,
         merchant=merchant.strip(),
-        country=country.strip(),
+        country=country.strip() if country else None,
         membership_number=membership_number.strip(),
         expiry_date=expiry_date,
     )
-    db.add(membership)
-    await db.flush()
 
+    # Process image before flush so screenshot_path is included in the INSERT.
+    # membership.id is already set (uuid.uuid4 default), so save_image can use it.
     if image and image.filename:
         await _handle_image_upload(image, membership, user.id)
+
+    db.add(membership)
+    try:
+        await db.flush()
+    except IntegrityError:
+        await db.rollback()
+        if membership.screenshot_path:
+            delete_image(membership.screenshot_path)
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You already have a membership with this merchant and number.")
 
     if group_ids:
         await db.execute(
