@@ -74,12 +74,27 @@ CREATE TABLE wmd.memberships (
     membership_number TEXT NOT NULL,
     screenshot_path   TEXT,
     expiry_date       DATE,
+    is_expired		  BOOLEAN NOT NULL default false,
     created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_membership_user_merch_mno UNIQUE (user_id, merchant, membership_number)
 );
 
 CREATE INDEX idx_memberships_user_id     ON wmd.memberships(user_id);
 CREATE INDEX idx_memberships_expiry_date ON wmd.memberships(expiry_date);
+
+-- auto process is_expired field for every new / update membership actions
+CREATE OR REPLACE FUNCTION wmd.sync_is_expired()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+    NEW.is_expired := (NEW.expiry_date IS NOT NULL AND NEW.expiry_date < CURRENT_DATE);
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_memberships_is_expired
+BEFORE INSERT OR UPDATE OF expiry_date ON wmd.memberships
+FOR EACH ROW EXECUTE FUNCTION wmd.sync_is_expired();
 
 -- Keep updated_at current automatically.
 CREATE OR REPLACE FUNCTION wmd.set_updated_at()
