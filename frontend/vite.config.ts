@@ -16,7 +16,7 @@ export default defineConfig({
       '/groups':      { target: 'http://localhost:8000', bypass: apiBypass },
       '/invites':     { target: 'http://localhost:8000', bypass: apiBypass },
       '/memberships': { target: 'http://localhost:8000', bypass: apiBypass },
-      '/media':       { target: 'http://localhost:8000', bypass: apiBypass },
+      '/media':       'http://localhost:8000',
     },
   },
   base: '/',

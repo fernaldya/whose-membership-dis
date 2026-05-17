@@ -7,14 +7,17 @@ export function InviteBanner() {
   if (!invites?.length) return null
 
   return (
-    <div className="border-b border-amber-200 bg-amber-50 px-4 py-3">
+    <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-500/20 dark:bg-amber-500/10">
       <div className="mx-auto max-w-5xl space-y-2">
-        <p className="text-sm font-medium text-amber-800">
+        <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
           You have {invites.length} pending group invite{invites.length > 1 ? 's' : ''}
         </p>
         {invites.map((inv) => (
-          <div key={inv.id} className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm">
-            <span className="text-sm text-gray-700">
+          <div
+            key={inv.id}
+            className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm dark:bg-zinc-900"
+          >
+            <span className="text-sm text-slate-700 dark:text-zinc-300">
               <span className="font-medium">{inv.invited_by_name}</span> invited you to{' '}
               <span className="font-medium">{inv.group_name}</span>
             </span>
@@ -22,14 +25,14 @@ export function InviteBanner() {
               <button
                 onClick={() => respond.mutate({ id: inv.id, action: 'accept' })}
                 disabled={respond.isPending}
-                className="rounded bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="rounded-md bg-violet-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-violet-500 disabled:opacity-50"
               >
                 Accept
               </button>
               <button
                 onClick={() => respond.mutate({ id: inv.id, action: 'decline' })}
                 disabled={respond.isPending}
-                className="rounded bg-white px-3 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
               >
                 Decline
               </button>
