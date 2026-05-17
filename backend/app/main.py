@@ -26,8 +26,9 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret_key,
     session_cookie="wmd_session",
-    same_site="none",
+    same_site="lax",
     https_only=True,
+    domain=".climbge.com",
 )
 
 _parsed = urlparse(settings.frontend_url)
