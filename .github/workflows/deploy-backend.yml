@@ -1,0 +1,75 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:latest
+            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: IMAGE,GHCR_ACTOR,GHCR_TOKEN,DATABASE_URL,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,SESSION_SECRET_KEY,FRONTEND_URL
+          script: |
+            mkdir -p /app/wmd/uploads
+
+            {
+              echo "DATABASE_URL=${DATABASE_URL}"
+              echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}"
+              echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}"
+              echo "SESSION_SECRET_KEY=${SESSION_SECRET_KEY}"
+              echo "FRONTEND_URL=${FRONTEND_URL}"
+            } > /app/wmd/.env
+            chmod 600 /app/wmd/.env
+
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_ACTOR}" --password-stdin
+            docker pull "${IMAGE}:latest"
+
+            docker stop wmd-backend || true
+            docker rm wmd-backend || true
+            docker run -d \
+              --name wmd-backend \
+              --restart unless-stopped \
+              -p 127.0.0.1:8000:8000 \
+              -v /app/wmd/uploads:/app/wmd/uploads \
+              --env-file /app/wmd/.env \
+              "${IMAGE}:latest"
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}/backend
+          GHCR_ACTOR: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          SESSION_SECRET_KEY: ${{ secrets.SESSION_SECRET_KEY }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
