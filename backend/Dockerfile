@@ -9,7 +9,7 @@ COPY app/ ./app/
 
 RUN mkdir -p uploads && \
     groupadd -r wmd && \
-    useradd -r -g wmd -u 1001 wmd && \
+    useradd -r -g wmd -u 1001 -m wmd && \
     chown -R wmd:wmd /app/wmd
 
 USER wmd
