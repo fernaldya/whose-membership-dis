@@ -64,6 +64,7 @@ jobs:
               -p 127.0.0.1:8000:8000 \
               -v /app/wmd/uploads:/app/wmd/uploads \
               --env-file /app/wmd/.env \
+              --sysctl net.ipv6.conf.all.disable_ipv6=1 \
               "${IMAGE}:latest"
         env:
           IMAGE: ghcr.io/${{ github.repository }}/backend
