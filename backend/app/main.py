@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.parse import urlparse
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,12 +27,15 @@ app.add_middleware(
     secret_key=settings.session_secret_key,
     session_cookie="wmd_session",
     same_site="lax",
-    https_only=False,  # flip to True in production
+    https_only=True,  # flip to True in production
 )
+
+_parsed = urlparse(settings.frontend_url)
+_frontend_origin = f"{_parsed.scheme}://{_parsed.netloc}"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url],
+    allow_origins=[_frontend_origin],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
