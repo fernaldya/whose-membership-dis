@@ -156,7 +156,7 @@ export function GroupsPage() {
 
 function GroupDetail({
   groupId,
-  groupName,
+  groupName: _groupName,
   currentUserId,
   isOwner,
   onLeave,
