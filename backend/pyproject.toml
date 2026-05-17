@@ -15,6 +15,7 @@ dependencies = [
     "pydantic-settings>=2.2.0",
     "pydantic[email]>=2.7.0",
     "itsdangerous>=2.2.0",
+    "sentry-sdk[fastapi]>=2.0.0",
 ]
 
 [tool.uv]

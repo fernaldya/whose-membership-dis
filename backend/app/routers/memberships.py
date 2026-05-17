@@ -1,7 +1,10 @@
+import logging
 import math
 import uuid
 from datetime import date
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import JSONResponse
@@ -231,11 +234,20 @@ async def create_membership(
     db.add(membership)
     try:
         await db.flush()
-    except IntegrityError:
+    except IntegrityError as exc:
         await db.rollback()
         if membership.screenshot_path:
             delete_image(membership.screenshot_path)
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You already have a membership with this merchant and number.")
+        if "uq_membership_user_merch_mno" in str(exc.orig):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You already have a membership with this merchant and number.")
+        logger.error("Unexpected integrity error creating membership", exc_info=exc)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong, please try again.")
+    except Exception as exc:
+        await db.rollback()
+        if membership.screenshot_path:
+            delete_image(membership.screenshot_path)
+        logger.error("Unexpected error creating membership", exc_info=exc)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Something went wrong, please try again.")
 
     if group_ids:
         await db.execute(
