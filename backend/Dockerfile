@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.14-slim
+FROM ghcr.io/astral-sh/uv:0.11.14-python3.13-trixie
 
 WORKDIR /app/wmd
 
