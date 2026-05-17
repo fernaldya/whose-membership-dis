@@ -31,6 +31,7 @@ jobs:
       - name: Build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: pnpm exec tsc -b && pnpm exec vite build
         working-directory: frontend
 
