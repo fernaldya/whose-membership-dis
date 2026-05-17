@@ -108,11 +108,7 @@ async def _require_owner(
     return m
 
 
-async def _handle_image_upload(
-    image: UploadFile,
-    membership: Membership,
-    user_id: uuid.UUID,
-) -> None:
+async def _handle_image_upload(image: UploadFile, membership: Membership) -> None:
     try:
         validate_image(image.content_type or "", image.filename or "")
     except ValueError as exc:
@@ -129,7 +125,7 @@ async def _handle_image_upload(
     except Exception:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not process image")
 
-    membership.screenshot_path = save_image(user_id, membership.id, webp)
+    membership.screenshot_path = save_image(membership.id, webp)
 
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
@@ -221,6 +217,7 @@ async def create_membership(
     await _assert_group_membership(db, group_ids, user.id)
 
     membership = Membership(
+        id=uuid.uuid4(),
         user_id=user.id,
         merchant=merchant.strip(),
         country=country.strip() if country else None,
@@ -228,10 +225,8 @@ async def create_membership(
         expiry_date=expiry_date,
     )
 
-    # Process image before flush so screenshot_path is included in the INSERT.
-    # membership.id is already set (uuid.uuid4 default), so save_image can use it.
     if image and image.filename:
-        await _handle_image_upload(image, membership, user.id)
+        await _handle_image_upload(image, membership)
 
     db.add(membership)
     try:
@@ -296,7 +291,7 @@ async def replace_image(
 ):
     m = await _require_owner(db, membership_id, user.id)
     old_path = m.screenshot_path
-    await _handle_image_upload(image, m, user.id)
+    await _handle_image_upload(image, m)
     if old_path and old_path != m.screenshot_path:
         delete_image(old_path)
     await db.commit()

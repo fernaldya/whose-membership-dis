@@ -27,11 +27,8 @@ def convert_to_webp(data: bytes) -> bytes:
     return buf.getvalue()
 
 
-def save_image(user_id: uuid.UUID, membership_id: uuid.UUID, data: bytes) -> str:
-    """Write WebP bytes to disk and return the relative path."""
-    dest = Path(settings.upload_dir) / str(user_id)
-    dest.mkdir(parents=True, exist_ok=True)
-    rel = f"{user_id}/{membership_id}.webp"
+def save_image(membership_id: uuid.UUID, data: bytes) -> str:
+    rel = f"{membership_id}.webp"
     (Path(settings.upload_dir) / rel).write_bytes(data)
     return rel
 
