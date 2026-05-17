@@ -47,6 +47,7 @@ jobs:
       - name: Build
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: pnpm exec tsc -b && pnpm exec vite build --base="${BASE_PATH}/"
         working-directory: frontend
 
