@@ -7,21 +7,9 @@ on:
       - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -36,29 +24,22 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
       - name: Build
         env:
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
-        run: pnpm exec tsc -b && pnpm exec vite build --base="${BASE_PATH}/"
+        run: pnpm exec tsc -b && pnpm exec vite build
         working-directory: frontend
 
-      - name: Copy index.html to 404.html for SPA routing
-        run: cp frontend/dist/index.html frontend/dist/404.html
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to VPS
+        uses: burnett01/rsync-deployments@7.0.1
         with:
-          path: frontend/dist
-
-      - name: Deploy
-        id: deploy
-        uses: actions/deploy-pages@v4
+          switches: -avzr --delete --chmod=D755,F644
+          path: frontend/dist/
+          remote_path: /app/wmd/static/
+          remote_host: ${{ secrets.VPS_HOST }}
+          remote_user: ${{ secrets.VPS_USER }}
+          remote_key: ${{ secrets.VPS_SSH_KEY }}
