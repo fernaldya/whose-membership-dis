@@ -39,7 +39,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: IMAGE,GHCR_ACTOR,GHCR_TOKEN,DATABASE_URL,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,SESSION_SECRET_KEY,FRONTEND_URL
+          envs: IMAGE,GHCR_ACTOR,GHCR_TOKEN,DATABASE_URL,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,SESSION_SECRET_KEY,FRONTEND_URL,GOOGLE_REDIRECT_URI
           script: |
             mkdir -p /app/wmd/uploads
 
@@ -49,6 +49,7 @@ jobs:
               echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}"
               echo "SESSION_SECRET_KEY=${SESSION_SECRET_KEY}"
               echo "FRONTEND_URL=${FRONTEND_URL}"
+              echo "GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}"
             } > /app/wmd/.env
             chmod 600 /app/wmd/.env
 
@@ -73,3 +74,4 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           SESSION_SECRET_KEY: ${{ secrets.SESSION_SECRET_KEY }}
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
