@@ -154,6 +154,7 @@ export function MembershipForm({ groups, initial, onSubmit, onCancel, isPending,
           }}
           className="hidden"
           onChange={(e) => {
+            register('image').onChange(e)
             const file = e.target.files?.[0]
             if (file) {
               setPreview(URL.createObjectURL(file))
