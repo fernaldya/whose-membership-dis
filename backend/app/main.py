@@ -26,8 +26,8 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret_key,
     session_cookie="wmd_session",
-    same_site="lax",
-    https_only=True,  # flip to True in production
+    same_site="none",
+    https_only=True,
 )
 
 _parsed = urlparse(settings.frontend_url)
