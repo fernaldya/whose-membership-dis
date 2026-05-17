@@ -43,7 +43,7 @@ export function LoginPage() {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <a
-            href="/auth/login"
+            href={`${import.meta.env.VITE_API_URL ?? ''}/auth/login`}
             className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
           >
             <GoogleLogo />
