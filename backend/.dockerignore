@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+uploads/
+.ruff_cache/
+.python-version
+.tool-versions
