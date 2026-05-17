@@ -11,7 +11,7 @@ document.documentElement.classList.toggle('dark', saved === 'dark')
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
-    integrations: [
+integrations: [
       Sentry.browserTracingIntegration(),
       Sentry.replayIntegration(),
       Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
