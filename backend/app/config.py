@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     google_redirect_uri: str = "http://localhost:8000/auth/callback"
     upload_dir: str = "uploads"
     max_upload_bytes: int = 5 * 1024 * 1024
+    sentry_dsn: str | None = None
 
 
 settings = Settings()

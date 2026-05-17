@@ -7,7 +7,12 @@ RUN uv sync --frozen --no-dev
 
 COPY app/ ./app/
 
-RUN mkdir -p uploads
+RUN mkdir -p uploads && \
+    groupadd -r wmd && \
+    useradd -r -g wmd -u 1001 wmd && \
+    chown -R wmd:wmd /app/wmd
+
+USER wmd
 
 EXPOSE 8000
 
