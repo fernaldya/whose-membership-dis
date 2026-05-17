@@ -56,6 +56,9 @@ jobs:
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_ACTOR}" --password-stdin
             docker pull "${IMAGE}:latest"
 
+            SUPABASE_HOST=$(echo "${DATABASE_URL}" | sed 's|.*@\([^:/]*\).*|\1|')
+            SUPABASE_IPV4=$(python3 -c "import socket; print(socket.getaddrinfo('${SUPABASE_HOST}', 5432, socket.AF_INET)[0][4][0])")
+
             docker stop wmd-backend || true
             docker rm wmd-backend || true
             docker run -d \
@@ -64,7 +67,7 @@ jobs:
               -p 127.0.0.1:8000:8000 \
               -v /app/wmd/uploads:/app/wmd/uploads \
               --env-file /app/wmd/.env \
-              --sysctl net.ipv6.conf.all.disable_ipv6=1 \
+              --add-host "${SUPABASE_HOST}:${SUPABASE_IPV4}" \
               "${IMAGE}:latest"
         env:
           IMAGE: ghcr.io/${{ github.repository }}/backend
