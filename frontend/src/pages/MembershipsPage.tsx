@@ -3,7 +3,7 @@ import { useCreateMembership, useDeleteMembership, useMemberships, useUpdateMemb
 import { useGroups } from '../hooks/useGroups'
 import { MembershipCard } from '../components/MembershipCard'
 import { MembershipForm, type MembershipFormValues } from '../components/MembershipForm'
-import type { Membership, SortDir, SortField } from '../types'
+import type { GroupSummary, Membership, SortDir, SortField } from '../types'
 import { membershipsApi } from '../api/memberships'
 
 const SORT_OPTIONS: { value: SortField; label: string }[] = [
@@ -21,7 +21,7 @@ export function MembershipsPage() {
   const [sortBy, setSortBy] = useState<SortField>('created_at')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [search, setSearch] = useState('')
-  const [groupFilter, setGroupFilter] = useState('')
+  const [groupFilters, setGroupFilters] = useState<string[]>([])
   const [showExpired, setShowExpired] = useState(false)
   const [personalOnly, setPersonalOnly] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -32,7 +32,7 @@ export function MembershipsPage() {
     sort_by: sortBy,
     sort_dir: sortDir,
     search: search || undefined,
-    group_id: groupFilter || undefined,
+    group_ids: groupFilters.length > 0 ? groupFilters : undefined,
     show_expired: showExpired,
     personal_only: personalOnly || undefined,
   })
@@ -116,27 +116,16 @@ export function MembershipsPage() {
           className={`${controlClass} placeholder:text-slate-400 dark:placeholder:text-zinc-500`}
         />
 
-        <select
-          value={personalOnly ? '__personal__' : groupFilter}
-          onChange={(e) => {
-            const val = e.target.value
-            if (val === '__personal__') {
-              setPersonalOnly(true)
-              setGroupFilter('')
-            } else {
-              setPersonalOnly(false)
-              setGroupFilter(val)
-            }
+        <GroupFilterDropdown
+          groups={groups}
+          groupFilters={groupFilters}
+          personalOnly={personalOnly}
+          onChange={({ groupFilters: gf, personalOnly: po }) => {
+            setGroupFilters(gf)
+            setPersonalOnly(po)
             setPage(1)
           }}
-          className={controlClass}
-        >
-          <option value="">All</option>
-          <option value="__personal__">Mine</option>
-          {groups.map((g) => (
-            <option key={g.id} value={g.id}>{g.name}</option>
-          ))}
-        </select>
+        />
 
         <select
           value={`${sortBy}:${sortDir}`}
@@ -173,7 +162,7 @@ export function MembershipsPage() {
 
       {!isLoading && data?.items.length === 0 && (
         <p className="py-12 text-center text-sm text-slate-500 dark:text-zinc-400">
-          {search || groupFilter ? 'No memberships match your filters.' : 'No memberships yet — add one above.'}
+          {search || groupFilters.length > 0 || personalOnly ? 'No memberships match your filters.' : 'No memberships yet — add one above.'}
         </p>
       )}
 
@@ -208,6 +197,90 @@ export function MembershipsPage() {
             Next →
           </button>
         </div>
+      )}
+    </div>
+  )
+}
+
+function GroupFilterDropdown({
+  groups,
+  groupFilters,
+  personalOnly,
+  onChange,
+}: {
+  groups: GroupSummary[]
+  groupFilters: string[]
+  personalOnly: boolean
+  onChange: (next: { groupFilters: string[]; personalOnly: boolean }) => void
+}) {
+  const [open, setOpen] = useState(false)
+
+  const activeCount = (personalOnly ? 1 : 0) + groupFilters.length
+  const label =
+    activeCount === 0
+      ? 'All groups'
+      : personalOnly && groupFilters.length === 0
+        ? 'Mine'
+        : groupFilters.length === 1 && !personalOnly
+          ? (groups.find((g) => g.id === groupFilters[0])?.name ?? '1 group')
+          : `${activeCount} selected`
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className={`${controlClass} flex items-center gap-2`}
+      >
+        {label}
+        <span className="text-slate-400 dark:text-zinc-500">▾</span>
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full z-20 mt-1 min-w-[180px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
+            <div
+              className="flex cursor-pointer items-center gap-2.5 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-zinc-200 dark:hover:bg-zinc-700"
+              onClick={() => onChange({ personalOnly: !personalOnly, groupFilters: [] })}
+            >
+              <input
+                type="checkbox"
+                checked={personalOnly}
+                onChange={() => {}}
+                className="rounded border-slate-300 text-violet-600 dark:border-zinc-600"
+              />
+              Mine
+            </div>
+            {groups.length > 0 && (
+              <div className="my-1 border-t border-slate-100 dark:border-zinc-700" />
+            )}
+            {groups.map((g) => {
+              const active = groupFilters.includes(g.id)
+              return (
+                <div
+                  key={g.id}
+                  className="flex cursor-pointer items-center gap-2.5 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                  onClick={() =>
+                    onChange({
+                      personalOnly: false,
+                      groupFilters: active
+                        ? groupFilters.filter((id) => id !== g.id)
+                        : [...groupFilters, g.id],
+                    })
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => {}}
+                    className="rounded border-slate-300 text-violet-600 dark:border-zinc-600"
+                  />
+                  {g.name}
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
     </div>
   )

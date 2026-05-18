@@ -7,7 +7,7 @@ export interface ListParams {
   sort_by?: SortField
   sort_dir?: SortDir
   search?: string
-  group_id?: string
+  group_ids?: string[]
   show_expired?: boolean
   personal_only?: boolean
 }
@@ -16,7 +16,12 @@ export const membershipsApi = {
   list: (params: ListParams = {}) => {
     const q = new URLSearchParams()
     Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== '') q.set(k, String(v))
+      if (v === undefined || v === '') return
+      if (Array.isArray(v)) {
+        v.forEach((item) => q.append(k, String(item)))
+      } else {
+        q.set(k, String(v))
+      }
     })
     return api.get<PaginatedMemberships>(`/memberships?${q}`)
   },

@@ -169,8 +169,8 @@ function GroupDetail({
 }) {
   const { data } = useGroup(groupId)
   const { data: membershipsData } = useQuery({
-    queryKey: ['memberships', { group_id: groupId, show_expired: true }],
-    queryFn: () => membershipsApi.list({ group_id: groupId, show_expired: true, page_size: 100 }),
+    queryKey: ['memberships', { group_ids: [groupId], show_expired: true }],
+    queryFn: () => membershipsApi.list({ group_ids: [groupId], show_expired: true, page_size: 100 }),
   })
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteResult, setInviteResult] = useState<string | null>(null)
