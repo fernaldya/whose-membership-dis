@@ -141,7 +141,7 @@ async def list_memberships(
     sort_by: str = Query("created_at"),
     sort_dir: str = Query("desc"),
     search: Optional[str] = Query(None),
-    group_id: Optional[uuid.UUID] = Query(None),
+    group_ids: list[uuid.UUID] = Query(default=[]),
     show_expired: bool = Query(False),
     personal_only: bool = Query(False),
     user: User = Depends(get_current_user),
@@ -182,14 +182,20 @@ async def list_memberships(
                 )
             )
         )
-    if group_id:
-        gm = await db.get(GroupMember, (group_id, user.id))
-        if not gm:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a member of this group")
+    if group_ids:
+        result = await db.execute(
+            select(GroupMember.group_id).where(
+                GroupMember.user_id == user.id,
+                GroupMember.group_id.in_(group_ids),
+            )
+        )
+        accessible = {row[0] for row in result.all()}
+        if missing := set(group_ids) - accessible:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a member of one or more specified groups")
         q = q.join(
             membership_groups_table,
             membership_groups_table.c.membership_id == Membership.id,
-        ).where(membership_groups_table.c.group_id == group_id)
+        ).where(membership_groups_table.c.group_id.in_(group_ids))
 
     sort_col = getattr(Membership, sort_by)
     q = q.order_by(sort_col.desc() if sort_dir == "desc" else sort_col.asc())
