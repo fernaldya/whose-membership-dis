@@ -1,0 +1,66 @@
+{
+  "hash": "fdc113b1",
+  "configHash": "fea5b72e",
+  "lockfileHash": "7525f407",
+  "browserHash": "7a701d6b",
+  "optimized": {
+    "@sentry/react": {
+      "src": "../../node_modules/.pnpm/@sentry+react@10.53.1_react@19.2.6/node_modules/@sentry/react/build/esm/index.js",
+      "file": "@sentry_react.js",
+      "fileHash": "f55a51da",
+      "needsInterop": false
+    },
+    "@tanstack/react-query": {
+      "src": "../../node_modules/.pnpm/@tanstack+react-query@5.100.10_react@19.2.6/node_modules/@tanstack/react-query/build/modern/index.js",
+      "file": "@tanstack_react-query.js",
+      "fileHash": "d04ee355",
+      "needsInterop": false
+    },
+    "date-fns": {
+      "src": "../../node_modules/.pnpm/date-fns@4.1.0/node_modules/date-fns/index.js",
+      "file": "date-fns.js",
+      "fileHash": "4ecb3575",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "3a2b61d2",
+      "needsInterop": true
+    },
+    "react-hook-form": {
+      "src": "../../node_modules/.pnpm/react-hook-form@7.75.0_react@19.2.6/node_modules/react-hook-form/dist/index.esm.mjs",
+      "file": "react-hook-form.js",
+      "fileHash": "91aba002",
+      "needsInterop": false
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/.pnpm/react-router-dom@7.15.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "d814e63a",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../node_modules/.pnpm/react@19.2.6/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "900de44a",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/.pnpm/react@19.2.6/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "78a4f207",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "react-Dn94Augg": {
+      "file": "react-Dn94Augg.js",
+      "isDynamicEntry": false
+    },
+    "react-dom-BvsHEIU-": {
+      "file": "react-dom-BvsHEIU-.js",
+      "isDynamicEntry": false
+    }
+  }
+}
